@@ -1,3 +1,9 @@
+mod lexer;
+
 fn main() {
-    println!("Hello, world!");
+    let tokens = lexer::tokenize("src/fibonacci.txt");
+
+    for token in tokens {
+        println!("{}", token);
+    }
 }
