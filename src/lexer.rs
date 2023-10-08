@@ -1,6 +1,6 @@
 use std::{ fmt::{self, Debug, Display}, fs };
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TokenType {
     Variable(String),
     Int(i32),
@@ -16,20 +16,24 @@ pub enum TokenType {
     RBrace,
     Semicolon,
     Equal,
+    DoubleEqual,
     GreaterThan,
     LessThan,
     Not,
     And,
     Or,
+    TrueKeyword,
+    FalseKeyword,
     IfKeyword,
     ElseKeyword,
     WhileKeyword,
-    FnKeyword,
     LetKeyword,
+    PrintKeyword,
 }
 
+#[derive(PartialEq, Clone)]
 pub struct Token {
-    token_type: TokenType,
+    pub token_type: TokenType,
     line: usize,
     column: usize,
 }
@@ -70,8 +74,6 @@ pub fn tokenize(path: &str) -> Vec<Token> {
             '>' => Some(TokenType::GreaterThan),
             '<' => Some(TokenType::LessThan),
             '!' => Some(TokenType::Not),
-            '&' => Some(TokenType::And),
-            '|' => Some(TokenType::Or),
             ' ' | '\r' => None,
             'a'..='z' | 'A'..='Z' | '_' | '0'..='9' => {
                 string.push(c);
@@ -100,8 +102,13 @@ pub fn tokenize(path: &str) -> Vec<Token> {
                     "if" => TokenType::IfKeyword,
                     "else" => TokenType::ElseKeyword,
                     "while" => TokenType::WhileKeyword,
-                    "fn" => TokenType::FnKeyword,
                     "let" => TokenType::LetKeyword,
+                    "print" => TokenType::PrintKeyword,
+                    "true" => TokenType::TrueKeyword,
+                    "false" => TokenType::FalseKeyword,
+                    "==" => TokenType::DoubleEqual,
+                    "&&" => TokenType::And,
+                    "||" => TokenType::Or,
                     _ => TokenType::Variable(string),
                 };
 

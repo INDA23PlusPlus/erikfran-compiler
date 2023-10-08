@@ -1,13 +1,11 @@
-fn main() {
-    let a = 0;
-    let b = 1;
-    let n = 0;
+let a = 0;
+let b = 1;
+let n = 0;
 
-    while n < 100 {
-        print(b);
-        let c = b + a;
-        a = b;
-        b = c;
-        n = n + 1;
-    }
+while n < 100 {
+    print(b);
+    let c = b + a;
+    a = b;
+    b = c;
+    n = n + 1;
 }
