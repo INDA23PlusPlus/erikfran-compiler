@@ -9,8 +9,8 @@
 
 <boolean_expr> ::= <expr> <ow> "==" <ow> <expr> | <expr> <ow> ">" <ow> <expr> | <expr> <ow> "<" <ow> <expr> | <boolean_expr> <ow> "&&" <ow> <boolean_expr> | <boolean_expr> <ow> "||" <ow> <boolean_expr> | "!" <ow> <boolean_expr> | "true" | "false" 
 
-<expr> ::= <term> <ow> "+" <ow> <term> | <term> <ow> "-" <ow> <term> | <factor>
-<term> ::= <factor> <ow> "*" <ow> <factor> | <factor> <ow> "/" <ow> <factor> | <factor> <ow> "^" <ow> <factor> | <factor> <ow> "%" <ow> <factor>
+<expr> ::= <expr> <ow> "+" <ow> <term> | <expr> <ow> "-" <ow> <term> | <term>
+<term> ::= <term> <ow> "*" <ow> <factor> | <term> <ow> "/" <ow> <factor> | <term> <ow> "^" <ow> <factor> | <term> <ow> "%" <ow> <factor> | <factor>
 <factor> ::= "(" <expr> ")" | <number> | <variable>
 
 <number> ::= [0-9]+
@@ -19,5 +19,5 @@
 <variable> ::= ( ( [0-9] | [a-z] )+ "_"* )
 
 /* optional whitespace */
-<ow> ::= E | " " | "\n"
+<ow> ::= E | " " | "\n" | "\t" | "\r"
 

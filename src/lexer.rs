@@ -1,4 +1,4 @@
-use std::{ fmt::{self, Debug, Display}, fs };
+use std::fmt::{self, Debug, Display};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum TokenType {
@@ -50,14 +50,14 @@ impl Debug for Token {
     }
 }
 
-pub fn tokenize(path: &str) -> Vec<Token> {
+pub fn tokenize(input: &str) -> Vec<Token> {
     let mut tokens = Vec::new();
     let mut string = String::new();
 
     let mut line = 0;
     let mut column = 0;
 
-    for c in fs::read_to_string(path).unwrap().chars() {
+    for c in input.chars() {
         let token_type = match c {
             '+' => Some(TokenType::Plus),
             '-' => Some(TokenType::Minus),
