@@ -1,3 +1,23 @@
-<expr> ::= <expr> "+" <expr> |  | <number>
-<number> ::= <number> <digit> | <digit>
-<digit> ::= [0-9]
+<block> ::= E | <statment>
+<statment> ::= <ow> ( <if> | <print> | <while> | <let> | <assignment> ) <ow>
+
+<if> ::= ( "if " <boolean_expr> <ow> "{" <block> <ow> "}" ) ( <ow> "else " <ow> "{" <block> <ow> "}" )?
+<while> ::= "while " <boolean_expr> <ow> "{" <block> <ow> "}" 
+<print> ::= "print(" <expr> ");"
+<let> ::= "let " <variable> <ow> "=" <ow> <expr> ";"
+<assignment> ::= <variable> <ow> "=" <ow> <expr> ";"
+
+<boolean_expr> ::= <expr> <ow> "==" <ow> <expr> | <expr> <ow> ">" <ow> <expr> | <expr> <ow> "<" <ow> <expr> | <boolean_expr> <ow> "&&" <ow> <boolean_expr> | <boolean_expr> <ow> "||" <ow> <boolean_expr> | "!" <ow> <boolean_expr> | "true" | "false" 
+
+<expr> ::= <term> <ow> "+" <ow> <term> | <term> <ow> "-" <ow> <term> | <factor>
+<term> ::= <factor> <ow> "*" <ow> <factor> | <factor> <ow> "/" <ow> <factor> | <factor> <ow> "^" <ow> <factor> | <factor> <ow> "%" <ow> <factor>
+<factor> ::= "(" <expr> ")" | <number> | <variable>
+
+<number> ::= [0-9]+
+
+/* snacke_case variable names enforced by the compiler */
+<variable> ::= ( ( [0-9] | [a-z] )+ "_"* )
+
+/* optional whitespace */
+<ow> ::= E | " " | "\n"
+
