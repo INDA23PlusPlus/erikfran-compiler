@@ -21,14 +21,6 @@ pub enum Term {
         term: Box<Term>,
         factor: Box<Factor>,
     },
-    Modulo {
-        term: Box<Term>,
-        factor: Box<Factor>,
-    },
-    Pow {
-        term: Box<Term>,
-        factor: Box<Factor>,
-    },
     Factor(Box<Factor>),
 }
 
@@ -39,28 +31,33 @@ pub enum Factor {
     Parenthesis(Box<Expression>),
 }
 
+pub enum BooleanCompOp {
+    Equal,
+    NotEqual,
+    LessThan,
+    LessThanOrEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
+}
+
+pub enum BooleanOp {
+    And,
+    Or,
+    Xor,
+}
+
 pub enum BooleanExpression {
     Boolean(bool),
-    Equal {
-        expr1: Expression,
-        expr2: Expression,
-    },
-    GreaterThan {
-        expr1: Expression,
-        expr2: Expression,
-    },
-    LessThan {
+    Compare {
+        op: BooleanCompOp,
         expr1: Expression,
         expr2: Expression,
     },
     Not {
         expr: Box<BooleanExpression>,
     },
-    And {
-        expr1: Box<BooleanExpression>,
-        expr2: Box<BooleanExpression>,
-    },
-    Or {
+    BooleanOp {
+        op: BooleanOp,
         expr1: Box<BooleanExpression>,
         expr2: Box<BooleanExpression>,
     },
@@ -214,8 +211,9 @@ fn boolean_expression(token_iter: &mut std::slice::Iter<Token>) -> Result<Boolea
                 expr: Box::new(boolean_expression(token_iter)?), 
             })
         },
+        Some(token) => {
 
-        Some(token) => Err(AstCompError::ExpectedBooleanExpression(token.clone())),
+        },
         None => Err(AstCompError::EndOfFileInStatement),
     }
 }

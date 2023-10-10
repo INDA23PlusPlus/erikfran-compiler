@@ -1,5 +1,12 @@
 use crate::ast::*;
 
+pub enum RustTranspilerError {
+    ExpectedBooleanExpression,
+    ExpectedExpression,
+    ExpectedFactor,
+    ExpectedTerm,
+}
+
 pub fn transpile(ast: Ast) -> String {
     let mut block_iter = ast.ast.iter();
 
@@ -37,5 +44,39 @@ fn factor_comp(factor: Box<Factor>) -> String {
     match *factor {
         Factor::Int(value) => value.to_string(),
         _ => String::new(),
+    }
+}
+
+fn bool_comp(bool: Box<BooleanExpression>) -> String {
+    match *bool {
+        BooleanExpression::And { expr1, expr2 } => {
+            format!("({} && {})", expr_comp(expr1), expr_comp(expr2))
+        },
+        BooleanExpression::Or { expr1, expr2 } => {
+            format!("({} || {})", expr_comp(expr1), expr_comp(expr2))
+        },
+        BooleanExpression::Not { expr } => {
+            format!("(!{})", expr_comp(expr))
+        },
+        BooleanExpression::Equal { expr1, expr2 } => {
+            format!("({} == {})", expr_comp(&expr1), expr_comp(&expr2))
+        },
+        BooleanExpression::NotEquals { expr1, expr2 } => {
+            format!("({} != {})", expr_comp(&expr1), expr_comp(&expr2))
+        },
+        BooleanExpression::LessThan { expr1, expr2 } => {
+            format!("({} < {})", expr_comp(&expr1), expr_comp(&expr2))
+        },
+        BooleanExpression::LessThanOrEqual { expr1, expr2 } => {
+            format!("({} <= {})", expr_comp(&expr1), expr_comp(&expr2))
+        },
+        BooleanExpression::GreaterThan { expr1, expr2 } => {
+            format!("({} > {})", expr_comp(&expr1), expr_comp(&expr2))
+        },
+        BooleanExpression::GreaterThanOrEqual { expr1, expr2 } => {
+            format!("({} >= {})", expr_comp(&expr1), expr_comp(&expr2))
+        },
+        BooleanExpression::True => "true".to_string(),
+        BooleanExpression::False => "false".to_string(),
     }
 }
