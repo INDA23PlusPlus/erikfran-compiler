@@ -1,12 +1,12 @@
-use std::{fs, process::{self, Stdio}};
+use std::{fs, process::{self, Stdio}, env::args};
 
 mod lexer;
 mod ast;
 mod rust_transpiler;
 
 fn main() {
-    let path = "src/test.txt";
-    let string = fs::read_to_string(path).unwrap();
+    let path = args().nth(1).expect("No file path provided");
+    let string = fs::read_to_string(&path).unwrap();
 
     println!("Source code:\n\n{}\n", string);
 
