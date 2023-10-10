@@ -45,7 +45,7 @@ fn main() {
         .output()
         .unwrap();
 
-    let exe_path = rs_path.replace(".rs", ".exe").replace("examples/", "/target/debug/examples/");
+    let exe_path = rs_path.replace(".rs", ".exe").replace("examples/", "target/debug/examples/");
     println!("Exe file path: {}", exe_path);
     println!("Running Rust code:\n");
     process::Command::new(".\\".to_string() + exe_path.as_str())

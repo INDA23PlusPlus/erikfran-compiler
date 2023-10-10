@@ -108,6 +108,7 @@ pub enum AstCompError {
     ExpectedStatement(Token),
     ExpectedPrintParenthesis(Token),
     EndOfFileInStatement,
+    EndOfFileInBlock,
 }
 
 impl Display for AstCompError {
@@ -128,6 +129,7 @@ impl Display for AstCompError {
             Self::ExpectedStatement(t) => write!(f, "{:?}: Expected statement found {:?}", self, t),
             Self::ExpectedPrintParenthesis(t) => write!(f, "{:?}: Expected print parenthesis found {:?}", self, t),
             Self::EndOfFileInStatement => write!(f, "{:?}: End of file in statement", self),
+            Self::EndOfFileInBlock => write!(f, "{:?}: End of file in block", self),
         }
     }
 }
@@ -136,47 +138,64 @@ impl Error for AstCompError {}
 
 use std::error::Error;
 use std::fmt::{self, Display};
+use std::slice::Iter;
+use std::iter::Peekable;
 
 use crate::lexer::{ Token, TokenType };
 
 pub fn ast_comp(tokens: Vec<Token>) -> Result<Ast, AstCompError> {
-    Ok(Ast { ast: block(&mut tokens.iter())? } )
+    Ok(Ast { ast: block(&mut tokens.iter().peekable())? } )
 }
 
-fn expression(token_iter: &mut std::slice::Iter<Token>) -> Result<Expression, AstCompError> {
-    /* match token_iter.next() {
-        Some(token) => { 
-            let term = term(token_iter)?;
+fn expression(token_iter: &mut Peekable<Iter<Token>>) -> Result<Expression, AstCompError> {
+    let term = term(token_iter)?;
 
-            match token_iter.next() {
-                Some(Token { token_type: TokenType::Plus, .. }) => Ok(Expression::Plus { 
-                    expr: Box::new(expression(token_iter)?), 
-                    term: Box::new(term), 
-                }),
-                Some(Token { token_type: TokenType::Minus, .. }) => Ok(Expression::Minus { 
-                    expr: Box::new(expression(token_iter)?), 
-                    term: Box::new(term), 
-                }),
-                _ => Ok(Expression::Term(Box::new(term))),
-            }
+    match token_iter.peek() {
+        Some(Token { token_type: TokenType::Plus, ..}) => {
+            token_iter.next();
+
+            Ok(Expression::Plus { 
+                expr: Box::new(expression(token_iter)?), 
+                term: Box::new(term), 
+            })
         },
-        None => Err(AstCompError::EndOfFileInStatement),
-    } */
+        Some(Token { token_type: TokenType::Minus, ..}) => {
+            token_iter.next();
 
-    Ok(Expression::Term(Box::new(term(token_iter)?)))
+            Ok(Expression::Minus { 
+                expr: Box::new(expression(token_iter)?), 
+                term: Box::new(term), 
+            })
+        },
+        _ => Ok(Expression::Term(Box::new(term))),
+    }
 }
 
-fn term(token_iter: &mut std::slice::Iter<Token>) -> Result<Term, AstCompError> {
-/*     match token_iter.next() {
+fn term(token_iter: &mut Peekable<Iter<Token>>) -> Result<Term, AstCompError> {
+    let factor = factor(token_iter)?;
 
-        Some(token) => Err(AstCompError::ExpectedExpression(token.clone())),
-        None => Err(AstCompError::EndOfFileInStatement),
-    } */
+    match token_iter.peek() {
+        Some(Token { token_type: TokenType::Multiply, ..}) => {
+            token_iter.next();
 
-    Ok(Term::Factor(Box::new(factor(token_iter)?)))
+            Ok(Term::Multiply { 
+                term: Box::new(term(token_iter)?), 
+                factor: Box::new(factor), 
+            })
+        },
+        Some(Token { token_type: TokenType::Divide, ..}) => {
+            token_iter.next();
+
+            Ok(Term::Divide { 
+                term: Box::new(term(token_iter)?), 
+                factor: Box::new(factor), 
+            })
+        },
+        _ => Ok(Term::Factor(Box::new(factor))),
+    }
 }
 
-fn factor(token_iter: &mut std::slice::Iter<Token>) -> Result<Factor, AstCompError> {
+fn factor(token_iter: &mut Peekable<Iter<Token>>) -> Result<Factor, AstCompError> {
     match token_iter.next() {
         Some(Token { token_type: TokenType::Int(i), .. }) => Ok(Factor::Int(*i)),
         Some(Token { token_type: TokenType::Variable(s), .. }) => Ok(Factor::Variable(s.clone())),
@@ -194,12 +213,31 @@ fn factor(token_iter: &mut std::slice::Iter<Token>) -> Result<Factor, AstCompErr
     }
 }
 
-fn boolean_expression(token_iter: &mut std::slice::Iter<Token>) -> Result<BooleanExpression, AstCompError> {
-    match token_iter.next() {
+impl TryFrom<Token> for BooleanCompOp {
+    type Error = AstCompError;
+
+    fn try_from(value: Token) -> Result<Self, AstCompError> {
+        match value {
+            Token { token_type: TokenType::Equal, .. } => Ok(Self::Equal),
+            Token { token_type: TokenType::NotEqual, .. } => Ok(Self::NotEqual),
+            Token { token_type: TokenType::GreaterThan, .. } => Ok(Self::GreaterThan),
+            Token { token_type: TokenType::LessThan, .. } => Ok(Self::LessThan),
+            Token { token_type: TokenType::GreaterThanOrEqual, .. } => Ok(Self::GreaterThanOrEqual),
+            Token { token_type: TokenType::LessThanOrEqual, .. } => Ok(Self::LessThanOrEqual),
+            _ => Err(AstCompError::ExpectedBooleanExpression(value)),
+        }
+    }
+}
+
+fn boolean_expression(token_iter: &mut Peekable<Iter<Token>>) -> Result<BooleanExpression, AstCompError> {
+    match token_iter.peek() {
         Some(Token { token_type: TokenType::TrueKeyword, .. }) => Ok(BooleanExpression::Boolean(true)),
         Some(Token { token_type: TokenType::FalseKeyword, .. }) => Ok(BooleanExpression::Boolean(false)),
         Some(Token { token_type: TokenType::LParen, .. }) => {
+            let _ = token_iter.next();
+
             let expr = boolean_expression(token_iter)?;
+
             match token_iter.next() {
                 Some(Token { token_type: TokenType::RParen, .. }) => Ok(expr),
                 Some(token) => Err(AstCompError::ExpectedRParen(token.clone())),
@@ -211,20 +249,35 @@ fn boolean_expression(token_iter: &mut std::slice::Iter<Token>) -> Result<Boolea
                 expr: Box::new(boolean_expression(token_iter)?), 
             })
         },
-        Some(token) => {
+        Some(_) => {
+            let expr1 = expression(token_iter)?;
+            
+            let op = BooleanCompOp::try_from(token_iter.next().unwrap().clone())?;
 
-        },
+            Ok(BooleanExpression::Compare { 
+                op: op, 
+                expr1: expr1, 
+                expr2: expression(token_iter)?, 
+            })
+        }
         None => Err(AstCompError::EndOfFileInStatement),
     }
 }
 
-fn block(token_iter: &mut std::slice::Iter<Token>) -> Result<Box<Vec<Statement>>, AstCompError> {
+fn block(token_iter: &mut Peekable<Iter<Token>>) -> Result<Box<Vec<Statement>>, AstCompError> {
     let mut statements = Vec::new();
+    println!("block");
+
+    match token_iter.next() {
+        Some(Token { token_type: TokenType::LBrace, .. }) => (),
+        Some(token) => return Err(AstCompError::ExpectedLBrace(token.clone())),
+        None => return Err(AstCompError::EndOfFileInBlock),
+    }
 
     loop {
         match token_iter.next() {
             Some(Token { token_type: TokenType::IfKeyword, .. }) => {
-                statements.push(Statement::If { 
+                statements.push(Statement::If {  
                     condition: boolean_expression(token_iter)?, 
                     body: block(token_iter)?, 
                     else_body: {
@@ -243,6 +296,7 @@ fn block(token_iter: &mut std::slice::Iter<Token>) -> Result<Box<Vec<Statement>>
                 });
             },
             Some(Token { token_type: TokenType::LetKeyword, .. }) => {
+                println!("let");
                 let variable = variable(token_iter)?;
 
                 match token_iter.next() {
@@ -312,7 +366,7 @@ fn block(token_iter: &mut std::slice::Iter<Token>) -> Result<Box<Vec<Statement>>
     Ok(Box::new(statements))
 }
 
-fn variable(token_iter: &mut std::slice::Iter<Token>) -> Result<String, AstCompError> {
+fn variable(token_iter: &mut Peekable<Iter<Token>>) -> Result<String, AstCompError> {
     match token_iter.next() {
         Some(Token { token_type: TokenType::Variable(s), .. }) => Ok(s.clone()),
         Some(token) => Err(AstCompError::ExpectedVariable(token.clone())),
