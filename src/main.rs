@@ -2,6 +2,7 @@ use std::{fs, process::{self, Stdio}, env::args};
 
 mod lexer;
 mod ast;
+mod semantic_analyzer;
 mod rust_transpiler;
 
 fn main() {
@@ -23,7 +24,18 @@ fn main() {
 
     println!("");
     let ast = match ast::ast_comp(tokens) {
-        Ok(ast) => ast,
+        Ok(ast) => {
+            println!("AST parse successful");
+            ast
+        },
+        Err(e) => {
+            println!("{}", e);
+            return;
+        },
+    };
+
+    match semantic_analyzer::analyze(&ast) {
+        Ok(_) => println!("Semantic analysis successful"),
         Err(e) => {
             println!("{}", e);
             return;

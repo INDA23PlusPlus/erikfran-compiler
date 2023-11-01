@@ -2,13 +2,6 @@ use crate::ast::*;
 
 use std::fmt::{self, Display};
 
-pub enum RustTranspilerError {
-    ExpectedBooleanExpression,
-    ExpectedExpression,
-    ExpectedFactor,
-    ExpectedTerm,
-}
-
 pub fn transpile(ast: Ast) -> String {
     let mut rust_code = String::new();
 
@@ -56,10 +49,10 @@ fn expr_comp(expr: &Expression) -> String {
     match expr {
         Expression::Term(term) => term_comp(term.clone()),
         Expression::Plus { expr, term } => {
-            format!("({} + {})", expr_comp(expr), term_comp(term.clone()))
+            format!("{} + {}", expr_comp(expr), term_comp(term.clone()))
         },
         Expression::Minus { expr, term } => {
-            format!("({} - {})", expr_comp(expr), term_comp(term.clone()))
+            format!("{} - {}", expr_comp(expr), term_comp(term.clone()))
         },
     }
 }
@@ -68,10 +61,10 @@ fn term_comp(term: Box<Term>) -> String {
     match *term {
         Term::Factor(factor) => factor_comp(factor),
         Term::Divide { term, factor } => {
-            format!("({} / {})", term_comp(term), factor_comp(factor))
+            format!("{} / {}", term_comp(term), factor_comp(factor))
         },
         Term::Multiply { term, factor } => {
-            format!("({} * {})", term_comp(term), factor_comp(factor))
+            format!("{} * {}", term_comp(term), factor_comp(factor))
         },
     }
 }
@@ -110,17 +103,17 @@ impl Display for BooleanCompOp {
 fn bool_comp(bool: &BooleanExpression) -> String {
     match bool {
         BooleanExpression::BooleanOp { op, expr1, expr2 } => {
-            format!("({} {} {})", bool_comp(&*expr1), op, bool_comp(&*expr2))
+            format!("{} {} {}", bool_comp(&*expr1), op, bool_comp(&*expr2))
         },
         BooleanExpression::Compare { op, expr1, expr2 } => {
-            format!("({} {} {})", expr_comp(&expr1), op, expr_comp(&expr2))
+            format!("{} {} {}", expr_comp(&expr1), op, expr_comp(&expr2))
         },
         BooleanExpression::Not { expr } => {
-            format!("(!{})", bool_comp(&*expr))
+            format!("!{}", bool_comp(&*expr))
         },
         BooleanExpression::Boolean(bool) => bool.to_string(),
         BooleanExpression::Parenthesis(expr) => {
-            format!("({})", bool_comp(&*expr))
+            format!("{}", bool_comp(&*expr))
         },
     }
 }
