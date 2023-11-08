@@ -3,5 +3,19 @@
 version = 3
 
 [[package]]
+name = "assembler"
+version = "0.1.0"
+source = "git+https://github.com/INDA23PlusPlus/erikfran-emulator#ee86f3cc1042e75e41f03131bbeed3c3f7d01b60"
+
+[[package]]
+name = "emulator"
+version = "0.1.0"
+source = "git+https://github.com/INDA23PlusPlus/erikfran-emulator#ee86f3cc1042e75e41f03131bbeed3c3f7d01b60"
+
+[[package]]
 name = "erikfran-compiler"
 version = "0.1.0"
+dependencies = [
+ "assembler",
+ "emulator",
+]

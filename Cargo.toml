@@ -6,3 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+emulator = { git = "https://github.com/INDA23PlusPlus/erikfran-emulator" }
+assembler = { git = "https://github.com/INDA23PlusPlus/erikfran-emulator" }

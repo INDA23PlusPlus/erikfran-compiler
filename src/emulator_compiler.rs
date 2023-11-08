@@ -1,15 +1,11 @@
 use crate::ast::*;
 
-pub fn transpile(ast: Ast) -> String {
-    let mut rust_code = String::new();
+pub fn compile(ast: Ast) -> String {
+    let mut assembly_code = String::new();
 
-    rust_code.push_str("fn main() {\n");
+    assembly_code.push_str(&block_comp(&*ast.ast));
 
-    rust_code.push_str(&block_comp(&*ast.ast));
-
-    rust_code.push_str("}\n");
-
-    rust_code
+    assembly_code
 }
 
 fn block_comp(block: &Vec<Statement>) -> String {
@@ -18,7 +14,7 @@ fn block_comp(block: &Vec<Statement>) -> String {
     for statement in block {
         out.push_str(&match statement {
             Statement::Print { expr } => {
-                format!("    println!(\"{{}}\", {});\n", expr_comp(expr))
+                format!("{}setmr\n", expr_comp(expr))
             },
             Statement::Let { variable, expr } => {
                 format!("    let mut {} = {};\n", variable, expr_comp(expr))

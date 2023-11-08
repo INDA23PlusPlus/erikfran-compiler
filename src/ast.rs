@@ -87,6 +87,29 @@ pub enum Statement {
     },
 }
 
+impl Display for BooleanOp {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            BooleanOp::And => write!(f, "&&"),
+            BooleanOp::Or => write!(f, "||"),
+            BooleanOp::Xor => write!(f, "^"),
+        }
+    }
+}
+
+impl Display for BooleanCompOp {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            BooleanCompOp::Equal => write!(f, "=="),
+            BooleanCompOp::NotEqual => write!(f, "!="),
+            BooleanCompOp::GreaterThan => write!(f, ">"),
+            BooleanCompOp::LessThan => write!(f, "<"),
+            BooleanCompOp::GreaterThanOrEqual => write!(f, ">="),
+            BooleanCompOp::LessThanOrEqual => write!(f, "<="),
+        }
+    }
+}
+
 pub struct Ast {
     pub ast: Box<Vec<Statement>>,
 }
