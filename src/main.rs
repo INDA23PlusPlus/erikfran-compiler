@@ -4,7 +4,7 @@ mod lexer;
 mod ast;
 mod semantic_analyzer;
 mod rust_transpiler;
-mod emulator_compiler;
+//mod emulator_compiler;
 
 fn main() {
     let path = args().nth(2).expect("No file path provided");
@@ -71,7 +71,8 @@ fn main() {
             .unwrap();
     }
     else if target == "emulator" {
-        let emulator_string = emulator_compiler::compile(ast);
+        todo!("Emulator not implemented");
+        /* let emulator_string = emulator_compiler::compile(ast);
         println!("Emulator assembly code:\n\n{}\n", emulator_string);
 
         let asm_path = path.replace(".txt", ".asm");
@@ -85,7 +86,7 @@ fn main() {
         println!("Emulator binary file path: {}", bin_path);
 
         println!("Running emulator binary:\n");
-        emulator::run(&bin_path);
+        emulator::run(&bin_path); */
     }
     else {
         println!("Unknown target: {}", target);
