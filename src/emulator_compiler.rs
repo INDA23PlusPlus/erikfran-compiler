@@ -72,12 +72,19 @@ fn register_allocate(variable: &str, state: &mut State) {
                     }
                 }
 
-                
+                state.variable_map.remove(variable);
+                state.variable_map.insert(variable.to_string(), Allocation::Memory(*address));
             },
         }
     }
     else {
         panic!("Variable {} not found!", variable);
+    }
+}
+
+fn two_register_allocate(variable1: &str, variable2: &str, state: &mut State) {
+    if let  =  {
+        
     }
 }
 
